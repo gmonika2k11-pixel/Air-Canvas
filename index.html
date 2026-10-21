@@ -1,17 +1,15 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Neon Virtual Canvas - Complete Edition</title>
+    <title>AI Neon Air Canvas - Gesture Control Edition</title>
     
-    <!-- Load External MediaPipe Framework Libraries via CDN Links -->
-    <script src="https://jsdelivr.net" crossorigin="anonymous"></script>
-    <script src="https://jsdelivr.net" crossorigin="anonymous"></script>
+    <!-- Ultra-reliable Mirror Global CDNs for Faster Load Speeds -->
+    <script src="https://unpkg.com" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com" crossorigin="anonymous"></script>
     
     <style>
-        /* Core Document Layout Styling */
         body { 
             margin: 0; 
             padding: 0; 
@@ -27,18 +25,18 @@
             height: 100vh; 
         }
         
-        /* Mirroring and Fading the Video Feed Layer */
+        /* faint mirror background layout to guide hand position */
         video { 
             transform: scaleX(-1); 
             position: absolute; 
             width: 100%; 
             height: 100%; 
             object-fit: cover; 
-            opacity: 0.15; 
+            opacity: 0.2; 
             z-index: 1;
         }
         
-        /* Transparent Sketching Layer Overlay */
+        /* The main air canvas drawing window board layer */
         canvas { 
             position: absolute; 
             top: 0; 
@@ -49,7 +47,7 @@
             z-index: 2;
         }
         
-        /* High-Speed Boot Loading Overlay Panel */
+        /* Loading Screen UI Shield Container */
         #loadingOverlay {
             position: absolute;
             top: 0;
@@ -65,10 +63,10 @@
             transition: opacity 0.5s ease;
         }
         .spinner {
-            width: 60px;
-            height: 60px;
-            border: 6px solid rgba(255, 255, 255, 0.1);
-            border-top: 6px solid #FF3399;
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.1);
+            border-top: 5px solid #FF3399;
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
@@ -79,14 +77,12 @@
         #loadingText {
             color: white;
             margin-top: 20px;
-            font-size: 18px;
-            letter-spacing: 1px;
+            font-size: 16px;
             text-align: center;
-            padding: 0 20px;
             line-height: 1.6;
         }
 
-        /* Responsive Floating Multi-Color Button Panel */
+        /* Interactive Menu Palette Control Elements */
         #menu { 
             position: absolute; 
             top: 20px; 
@@ -113,12 +109,10 @@
             align-items: center; 
             justify-content: center; 
             font-size: 18px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
             transition: transform 0.1s ease;
         }
         .btn:active { transform: scale(0.85); }
         
-        /* Custom Neon Colors Configurations */
         #red    { background: #FF3333; box-shadow: 0 0 10px #FF3333; }
         #orange { background: #FF9933; box-shadow: 0 0 10px #FF9933; }
         #yellow { background: #FFFF33; box-shadow: 0 0 10px #FFFF33; }
@@ -130,7 +124,6 @@
         #eraser { background: #444444; border-color: #ffffff; }
         #clear  { background: #222222; border-color: #FF3333; }
         
-        /* Floating HUD Display Status Console Window */
         #status { 
             position: absolute; 
             bottom: 20px; 
@@ -142,24 +135,20 @@
             font-weight: 500;
             z-index: 10; 
             border: 1px solid rgba(255,255,255,0.15);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
         }
     </style>
 </head>
 <body>
 
 <div id="container">
-    <!-- Active Global State Screen Preloader Template Panel -->
     <div id="loadingOverlay">
         <div class="spinner"></div>
-        <div id="loadingText">Downloading AI Engine Components...<br><small style="color: #888; font-size: 12px;">Takes ~30 seconds on first run. Please wait.</small></div>
+        <div id="loadingText">Waking Up AI Gesture Engine...<br><small style="color: #888; font-size: 12px;">Connecting to network distribution nodes...</small></div>
     </div>
 
-    <!-- Active Hardware Capture Pipeline Modules -->
     <video id="webcam" autoplay playsinline></video>
     <canvas id="paintCanvas"></canvas>
     
-    <!-- User Input Control Floating Panel Elements -->
     <div id="menu">
         <div class="btn" id="red" onclick="setColor('#FF3333', 'Neon Red')"></div>
         <div class="btn" id="orange" onclick="setColor('#FF9933', 'Neon Orange')"></div>
@@ -173,12 +162,10 @@
         <div class="btn" id="clear" onclick="clearCanvas()">❌</div>
     </div>
 
-    <!-- Live Execution Reporting Telemetry Window -->
-    <div id="status">System Status: Booting Environment Pipelines...</div>
+    <div id="status">System Status: Testing Environment...</div>
 </div>
 
 <script>
-// Capture DOM Handle Interfaces
 const video = document.getElementById('webcam');
 const canvas = document.getElementById('paintCanvas');
 const ctx = canvas.getContext('2d');
@@ -186,43 +173,44 @@ const statusDiv = document.getElementById('status');
 const loadingOverlay = document.getElementById('loadingOverlay');
 const loadingText = document.getElementById('loadingText');
 
-// Runtime Global Variables
 let currentColor = '#FF3333'; 
 let currentThickness = 8;
 let lastX = 0, lastY = 0;
 let isDrawing = false;
 
-// Adapt Canvas Dimension Grid Spaces Dynamically
 function resizeCanvas() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
+    ctx.shadowBlur = 8;
+    ctx.shadowColor = currentColor;
 }
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
 
-// User Palette Interactions Trigger Routines
 function setColor(hexColor, name) {
     currentColor = hexColor;
     currentThickness = 8;
+    ctx.shadowBlur = 8;
+    ctx.shadowColor = currentColor;
     statusDiv.innerText = `Active Tool: ${name}`;
 }
 
 function setEraser() {
-    currentColor = '#111111'; // Modifies stroke rendering target values to simulate backdrop erase paths
+    currentColor = '#111111'; 
     currentThickness = 60;     
+    ctx.shadowBlur = 0;
     statusDiv.innerText = "Active Tool: Eraser Pad";
 }
 
 function clearCanvas() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    statusDiv.innerText = "Canvas Cleared Successfully!";
+    statusDiv.innerText = "Canvas Cleared!";
 }
 
-// MediaPipe Multi-Hand Vector Coordinate Matrix Evaluation Routines
 function onResults(results) {
-    // Hide loading screen layout layer upon receiving the initial active landmark vectors frame tracking arrays
+    // Hide the loader window cleanly on first hand vector frame processing calculation
     if (loadingOverlay.style.opacity !== "0") {
         loadingOverlay.style.opacity = "0";
         setTimeout(() => loadingOverlay.style.display = "none", 500);
@@ -231,27 +219,23 @@ function onResults(results) {
     if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
         const hand = results.multiHandLandmarks[0];
         
-        // Target tracking node identifiers
+        // Landmark positions
         const indexTip = hand[8];
         const middleTip = hand[12];
         const indexPip = hand[6];
         const middlePip = hand[10];
 
-        // Map resolution coordinate coordinates values matching dimensions scale indexes
         const x = indexTip.x * canvas.width;
         const y = indexTip.y * canvas.height;
 
-        // Boolean checking parameters validating hand structures
         const indexUp = indexTip.y < indexPip.y;
         const middleUp = middleTip.y < middlePip.y;
 
         if (indexUp && middleUp) {
-            // SELECTION FIELD: Continuous tracing functions pause
             statusDiv.innerText = "Status: 🖐️ Navigation Mode (Paused)";
             isDrawing = false;
         } else if (indexUp && !middleUp) {
-            // DRAWING FIELD: Continuous line drawing mode
-            statusDiv.innerText = "Status: ✍️ Painting Art";
+            statusDiv.innerText = "Status: ✍️ Drawing Air Lines";
             ctx.strokeStyle = currentColor;
             ctx.lineWidth = currentThickness;
             
@@ -270,59 +254,49 @@ function onResults(results) {
             lastY = y;
         }
     } else {
-        statusDiv.innerText = "Status: Idle - Hand Out of Bounds";
+        statusDiv.innerText = "Status: Idle - Hand Out of Frame";
         isDrawing = false;
     }
 }
 
-// Initialize Multi-Hand Tracking Models Parameters Structures
+// Optimized Core Configuration
 const hands = new Hands({
-Use code with caution.
-locateFile: (file) => https://jsdelivr.net{file}
+    locateFile: (file) => `https://unpkg.com{file}`
 });
+
 hands.setOptions({
-maxNumHands: 1,
-modelComplexity: 0,          // ⚡ Optimizes tablet processing latency speeds via lightweight mobile model structures
-minDetectionConfidence: 0.5,
-minTrackingConfidence: 0.5
+    maxNumHands: 1,
+    modelComplexity: 0, 
+    minDetectionConfidence: 0.5, 
+    minTrackingConfidence: 0.5   
 });
 hands.onResults(onResults);
-// Safe Hardware Streaming Capture Init Routines
+
 async function initSystem() {
-try {
-loadingText.innerHTML = "Requesting System Camera Authorization...
-Please tap Allow on the system pop-up.";
-const stream = await navigator.mediaDevices.getUserMedia({
-video: {
-facingMode: "user",
-width: { ideal: 640 },
-height: { ideal: 480 }
-},
-audio: false
-});
-video.srcObject = stream;
-video.play();
-loadingText.innerHTML = "Initializing Neural Networks...
-Streaming compilation via WebAssembly Engine.";
-const camera = new Camera(video, {
-onFrame: async () => {
-await hands.send({image: video});
-},
-width: 640,
-height: 480
-});
-camera.start();
-} catch (err) {
-console.error(err);
-loadingText.innerHTML = "⚠️ CAMERA ERROR DETECTED
-Go to your tablet settings and unlock browser camera permissions manually.";
-}
-}
-// Attach script system routine triggers into window initialization events
-window.onload = initSystem;
-<FollowUp>
-Now copy and replace your file on GitHub with this complete source layout [filegen-via-code]! Once you've tested it on your tablet, let me know if it **boots completely** and displays all **8 colorful options** correctly.
-</FollowUp>
-    </script>
+    try {
+        loadingText.innerHTML = "Requesting System Camera Authorization...<br><small style='color:#aaa;'>Please tap Allow on the pop-up window.</small>";
+        
+        const stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+                facingMode: "user",
+                width: { ideal: 640 },
+                height: { ideal: 480 }
+            },
+            audio: false
+        });
+        
+        video.srcObject = stream;
+        video.play();
+        
+        loadingText.innerHTML = "Compiling Vision Pipelines...<br><small style='color:#aaa;'>Processing AI model array compilation rules...</small>";
+
+        const camera = new Camera(video, {
+            onFrame: async () => {
+                await hands.send({image: video});
+            },
+            width: 640,
+            height: 480
+        });
+        </script>
 </body>
 </html>
