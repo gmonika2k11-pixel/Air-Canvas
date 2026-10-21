@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Neon Air Canvas - Gesture Control Edition</title>
+    <title>AI Neon Air Canvas - Cloudflare Edition</title>
     
-    <!-- Ultra-reliable Mirror Global CDNs for Faster Load Speeds -->
-    <script src="https://unpkg.com" crossorigin="anonymous"></script>
-    <script src="https://unpkg.com" crossorigin="anonymous"></script>
+    <!-- Hyper-Performance Fail-Safe CDN Links hosted by Cloudflare -->
+    <script src="https://cloudflare.com" crossorigin="anonymous"></script>
+    <script src="https://cloudflare.com" crossorigin="anonymous"></script>
     
     <style>
         body { 
@@ -24,8 +24,6 @@
             width: 100vw; 
             height: 100vh; 
         }
-        
-        /* faint mirror background layout to guide hand position */
         video { 
             transform: scaleX(-1); 
             position: absolute; 
@@ -35,8 +33,6 @@
             opacity: 0.2; 
             z-index: 1;
         }
-        
-        /* The main air canvas drawing window board layer */
         canvas { 
             position: absolute; 
             top: 0; 
@@ -46,8 +42,6 @@
             transform: scaleX(-1); 
             z-index: 2;
         }
-        
-        /* Loading Screen UI Shield Container */
         #loadingOverlay {
             position: absolute;
             top: 0;
@@ -81,8 +75,6 @@
             text-align: center;
             line-height: 1.6;
         }
-
-        /* Interactive Menu Palette Control Elements */
         #menu { 
             position: absolute; 
             top: 20px; 
@@ -112,7 +104,6 @@
             transition: transform 0.1s ease;
         }
         .btn:active { transform: scale(0.85); }
-        
         #red    { background: #FF3333; box-shadow: 0 0 10px #FF3333; }
         #orange { background: #FF9933; box-shadow: 0 0 10px #FF9933; }
         #yellow { background: #FFFF33; box-shadow: 0 0 10px #FFFF33; }
@@ -123,7 +114,6 @@
         #pink   { background: #FF3399; box-shadow: 0 0 10px #FF3399; }
         #eraser { background: #444444; border-color: #ffffff; }
         #clear  { background: #222222; border-color: #FF3333; }
-        
         #status { 
             position: absolute; 
             bottom: 20px; 
@@ -143,7 +133,7 @@
 <div id="container">
     <div id="loadingOverlay">
         <div class="spinner"></div>
-        <div id="loadingText">Waking Up AI Gesture Engine...<br><small style="color: #888; font-size: 12px;">Connecting to network distribution nodes...</small></div>
+        <div id="loadingText">Connecting to Cloudflare Core Networks...<br><small style="color: #888; font-size: 12px;">Initializing machine learning pipelines...</small></div>
     </div>
 
     <video id="webcam" autoplay playsinline></video>
@@ -162,7 +152,7 @@
         <div class="btn" id="clear" onclick="clearCanvas()">❌</div>
     </div>
 
-    <div id="status">System Status: Testing Environment...</div>
+    <div id="status">System Status: Preparing Data Stream Pipelines...</div>
 </div>
 
 <script>
@@ -210,7 +200,6 @@ function clearCanvas() {
 }
 
 function onResults(results) {
-    // Hide the loader window cleanly on first hand vector frame processing calculation
     if (loadingOverlay.style.opacity !== "0") {
         loadingOverlay.style.opacity = "0";
         setTimeout(() => loadingOverlay.style.display = "none", 500);
@@ -219,7 +208,6 @@ function onResults(results) {
     if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
         const hand = results.multiHandLandmarks[0];
         
-        // Landmark positions
         const indexTip = hand[8];
         const middleTip = hand[12];
         const indexPip = hand[6];
@@ -259,9 +247,9 @@ function onResults(results) {
     }
 }
 
-// Optimized Core Configuration
+// 🔥 Alternate Fallback Paths Configured for Cloudflare Storage Packages
 const hands = new Hands({
-    locateFile: (file) => `https://unpkg.com{file}`
+    locateFile: (file) => `https://cloudflare.com{file}`
 });
 
 hands.setOptions({
@@ -288,7 +276,7 @@ async function initSystem() {
         video.srcObject = stream;
         video.play();
         
-        loadingText.innerHTML = "Compiling Vision Pipelines...<br><small style='color:#aaa;'>Processing AI model array compilation rules...</small>";
+        loadingText.innerHTML = "Compiling Vision Pipelines...<br><small style='color:#aaa;'>Booting localized tracking engines...</small>";
 
         const camera = new Camera(video, {
             onFrame: async () => {
@@ -297,6 +285,16 @@ async function initSystem() {
             width: 640,
             height: 480
         });
-        </script>
+        camera.start();
+        
+    } catch (err) {
+        console.error(err);
+        loadingText.innerHTML = "<span style='color:#ff3333;'>⚠️ ACCESS INTERRUPTED</span><br><small style='color:#ccc;'>Unlock browser app camera permissions in tablet settings.</small>";
+    }
+}
+
+window.onload = initSystem;
+</script>
 </body>
 </html>
+
