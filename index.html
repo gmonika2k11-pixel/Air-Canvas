@@ -1,33 +1,44 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Neon Virtual Canvas - 8 Colors Edition</title>
-    <!-- Load MediaPipe Frameworks via CDN -->
+    <title>AI Neon Virtual Canvas - Complete Edition</title>
+    
+    <!-- Load External MediaPipe Framework Libraries via CDN Links -->
     <script src="https://jsdelivr.net" crossorigin="anonymous"></script>
     <script src="https://jsdelivr.net" crossorigin="anonymous"></script>
+    
     <style>
+        /* Core Document Layout Styling */
         body { 
             margin: 0; 
             padding: 0; 
             overflow: hidden; 
             background: #111111; 
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            user-select: none;
+            -webkit-user-select: none;
         }
         #container { 
             position: relative; 
             width: 100vw; 
             height: 100vh; 
         }
+        
+        /* Mirroring and Fading the Video Feed Layer */
         video { 
             transform: scaleX(-1); 
             position: absolute; 
             width: 100%; 
             height: 100%; 
             object-fit: cover; 
-            opacity: 0.2; 
+            opacity: 0.15; 
+            z-index: 1;
         }
+        
+        /* Transparent Sketching Layer Overlay */
         canvas { 
             position: absolute; 
             top: 0; 
@@ -35,8 +46,47 @@
             width: 100%; 
             height: 100%; 
             transform: scaleX(-1); 
+            z-index: 2;
         }
-        /* Expanded Floating Rainbow Color Menu Layout */
+        
+        /* High-Speed Boot Loading Overlay Panel */
+        #loadingOverlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #111111;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            transition: opacity 0.5s ease;
+        }
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 6px solid rgba(255, 255, 255, 0.1);
+            border-top: 6px solid #FF3399;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        #loadingText {
+            color: white;
+            margin-top: 20px;
+            font-size: 18px;
+            letter-spacing: 1px;
+            text-align: center;
+            padding: 0 20px;
+            line-height: 1.6;
+        }
+
+        /* Responsive Floating Multi-Color Button Panel */
         #menu { 
             position: absolute; 
             top: 20px; 
@@ -64,12 +114,11 @@
             justify-content: center; 
             font-size: 18px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            transition: transform 0.1s ease, box-shadow 0.1s ease;
+            transition: transform 0.1s ease;
         }
-        .btn:active {
-            transform: scale(0.85);
-        }
-        /* Neon Palette Color Definitions */
+        .btn:active { transform: scale(0.85); }
+        
+        /* Custom Neon Colors Configurations */
         #red    { background: #FF3333; box-shadow: 0 0 10px #FF3333; }
         #orange { background: #FF9933; box-shadow: 0 0 10px #FF9933; }
         #yellow { background: #FFFF33; box-shadow: 0 0 10px #FFFF33; }
@@ -78,10 +127,10 @@
         #blue   { background: #3333FF; box-shadow: 0 0 10px #3333FF; }
         #purple { background: #9933FF; box-shadow: 0 0 10px #9933FF; }
         #pink   { background: #FF3399; box-shadow: 0 0 10px #FF3399; }
-        
         #eraser { background: #444444; border-color: #ffffff; }
         #clear  { background: #222222; border-color: #FF3333; }
         
+        /* Floating HUD Display Status Console Window */
         #status { 
             position: absolute; 
             bottom: 20px; 
@@ -100,10 +149,17 @@
 <body>
 
 <div id="container">
+    <!-- Active Global State Screen Preloader Template Panel -->
+    <div id="loadingOverlay">
+        <div class="spinner"></div>
+        <div id="loadingText">Downloading AI Engine Components...<br><small style="color: #888; font-size: 12px;">Takes ~30 seconds on first run. Please wait.</small></div>
+    </div>
+
+    <!-- Active Hardware Capture Pipeline Modules -->
     <video id="webcam" autoplay playsinline></video>
     <canvas id="paintCanvas"></canvas>
     
-    <!-- Expanded Floating Rainbow Palette Menu UI Layout -->
+    <!-- User Input Control Floating Panel Elements -->
     <div id="menu">
         <div class="btn" id="red" onclick="setColor('#FF3333', 'Neon Red')"></div>
         <div class="btn" id="orange" onclick="setColor('#FF9933', 'Neon Orange')"></div>
@@ -117,21 +173,26 @@
         <div class="btn" id="clear" onclick="clearCanvas()">❌</div>
     </div>
 
-    <div id="status">System Status: Booting Video Engines...</div>
+    <!-- Live Execution Reporting Telemetry Window -->
+    <div id="status">System Status: Booting Environment Pipelines...</div>
 </div>
 
 <script>
+// Capture DOM Handle Interfaces
 const video = document.getElementById('webcam');
 const canvas = document.getElementById('paintCanvas');
 const ctx = canvas.getContext('2d');
 const statusDiv = document.getElementById('status');
+const loadingOverlay = document.getElementById('loadingOverlay');
+const loadingText = document.getElementById('loadingText');
 
-// Runtime Configuration Settings
+// Runtime Global Variables
 let currentColor = '#FF3333'; 
 let currentThickness = 8;
 let lastX = 0, lastY = 0;
 let isDrawing = false;
 
+// Adapt Canvas Dimension Grid Spaces Dynamically
 function resizeCanvas() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
@@ -141,7 +202,7 @@ function resizeCanvas() {
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
 
-// Palette Controller Updates
+// User Palette Interactions Trigger Routines
 function setColor(hexColor, name) {
     currentColor = hexColor;
     currentThickness = 8;
@@ -149,37 +210,48 @@ function setColor(hexColor, name) {
 }
 
 function setEraser() {
-    currentColor = '#111111'; // Match body canvas layer background
-    currentThickness = 60;     // Wide footprint mask diameter
+    currentColor = '#111111'; // Modifies stroke rendering target values to simulate backdrop erase paths
+    currentThickness = 60;     
     statusDiv.innerText = "Active Tool: Eraser Pad";
 }
 
 function clearCanvas() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    statusDiv.innerText = "Canvas Cleared!";
+    statusDiv.innerText = "Canvas Cleared Successfully!";
 }
 
-// MediaPipe Multi-Hand Vector Computation Loops
+// MediaPipe Multi-Hand Vector Coordinate Matrix Evaluation Routines
 function onResults(results) {
+    // Hide loading screen layout layer upon receiving the initial active landmark vectors frame tracking arrays
+    if (loadingOverlay.style.opacity !== "0") {
+        loadingOverlay.style.opacity = "0";
+        setTimeout(() => loadingOverlay.style.display = "none", 500);
+    }
+
     if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
         const hand = results.multiHandLandmarks[0];
         
+        // Target tracking node identifiers
         const indexTip = hand[8];
         const middleTip = hand[12];
         const indexPip = hand[6];
         const middlePip = hand[10];
 
+        // Map resolution coordinate coordinates values matching dimensions scale indexes
         const x = indexTip.x * canvas.width;
         const y = indexTip.y * canvas.height;
 
+        // Boolean checking parameters validating hand structures
         const indexUp = indexTip.y < indexPip.y;
         const middleUp = middleTip.y < middlePip.y;
 
         if (indexUp && middleUp) {
+            // SELECTION FIELD: Continuous tracing functions pause
             statusDiv.innerText = "Status: 🖐️ Navigation Mode (Paused)";
             isDrawing = false;
         } else if (indexUp && !middleUp) {
-            statusDiv.innerText = "Status: ✍️ Drawing Art";
+            // DRAWING FIELD: Continuous line drawing mode
+            statusDiv.innerText = "Status: ✍️ Painting Art";
             ctx.strokeStyle = currentColor;
             ctx.lineWidth = currentThickness;
             
@@ -203,28 +275,54 @@ function onResults(results) {
     }
 }
 
-// Hardware-Accelerated Processing Instance Config
+// Initialize Multi-Hand Tracking Models Parameters Structures
 const hands = new Hands({
-    locateFile: (file) => `https://jsdelivr.net{file}`
+Use code with caution.
+locateFile: (file) => https://jsdelivr.net{file}
 });
-
 hands.setOptions({
-    maxNumHands: 1,
-    modelComplexity: 0,          // ⚡ Light model for tablet processor efficiency
-    minDetectionConfidence: 0.5, 
-    minTrackingConfidence: 0.5   
+maxNumHands: 1,
+modelComplexity: 0,          // ⚡ Optimizes tablet processing latency speeds via lightweight mobile model structures
+minDetectionConfidence: 0.5,
+minTrackingConfidence: 0.5
 });
 hands.onResults(onResults);
-
+// Safe Hardware Streaming Capture Init Routines
+async function initSystem() {
+try {
+loadingText.innerHTML = "Requesting System Camera Authorization...
+Please tap Allow on the system pop-up.";
+const stream = await navigator.mediaDevices.getUserMedia({
+video: {
+facingMode: "user",
+width: { ideal: 640 },
+height: { ideal: 480 }
+},
+audio: false
+});
+video.srcObject = stream;
+video.play();
+loadingText.innerHTML = "Initializing Neural Networks...
+Streaming compilation via WebAssembly Engine.";
 const camera = new Camera(video, {
-    onFrame: async () => {
-        await hands.send({image: video});
-    },
-    width: 640,
-    height: 480
+onFrame: async () => {
+await hands.send({image: video});
+},
+width: 640,
+height: 480
 });
 camera.start();
-</script>
-
+} catch (err) {
+console.error(err);
+loadingText.innerHTML = "⚠️ CAMERA ERROR DETECTED
+Go to your tablet settings and unlock browser camera permissions manually.";
+}
+}
+// Attach script system routine triggers into window initialization events
+window.onload = initSystem;
+<FollowUp>
+Now copy and replace your file on GitHub with this complete source layout [filegen-via-code]! Once you've tested it on your tablet, let me know if it **boots completely** and displays all **8 colorful options** correctly.
+</FollowUp>
+    </script>
 </body>
 </html>
