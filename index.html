@@ -19,7 +19,6 @@
             width: 100vw; 
             height: 100vh; 
         }
-        /* Video background feed layer */
         video { 
             transform: scaleX(-1); 
             position: absolute; 
@@ -29,7 +28,6 @@
             opacity: 0.35; 
             z-index: 1;
         }
-        /* Visual drawing window pane */
         canvas { 
             position: absolute; 
             top: 0; 
@@ -121,7 +119,7 @@
         <div class="btn" id="clear" onclick="clearCanvas()">❌</div>
     </div>
 
-    <div id="status">Tap Calibrate, then point target color at camera center</div>
+    <div id="status">Put color cap on finger -> Tap Calibrate -> Hold in screen center</div>
     <button id="calibrateBtn" onclick="startCalibration()">🎯 Calibrate Color</button>
 </div>
 
@@ -136,9 +134,9 @@ let currentThickness = 8;
 let lastX = 0, lastY = 0;
 let wasTracking = false;
 
-// Target color parameters (Defaults to tracking neon red caps/tape outlines)
-let targetR = 255, targetG = 50, targetB = 50;
-let colorThreshold = 45; 
+// Setup default tracking colors (Optimized target bounds)
+let targetR = 0, targetG = 180, targetB = 255; // Defaults to a strong bright neon color template
+let colorThreshold = 35; // Lower values mean tighter checking (prevents background noise matching)
 let isCalibrating = false;
 
 function resizeCanvas() {
@@ -174,19 +172,16 @@ function clearCanvas() {
 
 function startCalibration() {
     isCalibrating = true;
-    statusDiv.innerText = "Hold your colored finger tip directly in the center for 2 seconds...";
+    statusDiv.innerText = "🎯 Tracking Calibration Locked! Place target color spot at center...";
 }
 
-// Processing Frame Loop targeting 2GB RAM device optimization limitations
 function processFrame() {
     if (video.readyState === video.HAVE_ENOUGH_DATA) {
-        // Create an offscreen buffer canvas step minimizing processing latency memory leaps
         const tempCanvas = document.createElement('canvas');
-        tempCanvas.width = 160; // Downscaled matrix grid tracking prevents T515 CPU thrashing
+        tempCanvas.width = 160; 
         tempCanvas.height = 120;
         const tempCtx = tempCanvas.getContext('2d');
         
-        // Render flipped video frames onto target array layouts
         tempCtx.translate(tempCanvas.width, 0);
         tempCtx.scale(-1, 1);
         tempCtx.drawImage(video, 0, 0, tempCanvas.width, tempCanvas.height);
@@ -197,16 +192,14 @@ function processFrame() {
         let sumX = 0, sumY = 0, count = 0;
         
         if (isCalibrating) {
-            // Read target midpoint metrics vectors blocks directly
             const midIdx = ((tempCanvas.height / 2) * tempCanvas.width + (tempCanvas.width / 2)) * 4;
             targetR = data[midIdx];
             targetG = data[midIdx + 1];
             targetB = data[midIdx + 2];
             isCalibrating = false;
-            statusDiv.innerText = `Calibrated successfully! Color Captured: RGB(${targetR},${targetG},${targetB})`;
+            statusDiv.innerText = "Calibration Done! Ready to Draw.";
         }
 
-        // Sequential pixel analysis pass loop arrays mapping distance rules configurations
         for (let y = 0; y < tempCanvas.height; y++) {
             for (let x = 0; x < tempCanvas.width; x++) {
                 const idx = (y * tempCanvas.width + x) * 4;
@@ -214,7 +207,6 @@ function processFrame() {
                 const g = data[idx + 1];
                 const b = data[idx + 2];
                 
-                // Color match vector calculation maps distance metrics rules limits
                 const dist = Math.sqrt((r - targetR)**2 + (g - targetG)**2 + (b - targetB)**2);
                 if (dist < colorThreshold) {
                     sumX += x;
@@ -224,18 +216,24 @@ function processFrame() {
             }
         }
         
-        if (count > 8) {
-            // Convert scaled target pixels to full display coordinates layout maps
+        // 🔥 ANTI-GLITCH SAFETY MECHANISMS STAGE
+        // Limits tracking strictly between 15 pixels (finger point) and 400 pixels (ignores background wall blocks)
+        if (count > 15 && count < 400) {
             const posX = (sumX / count) / tempCanvas.width * canvas.width;
             const posY = (sumY / count) / tempCanvas.height * canvas.height;
             
             if (wasTracking) {
-                ctx.beginPath();
-                ctx.moveTo(lastX, lastY);
-                ctx.lineTo(posX, posY);
-                ctx.strokeStyle = currentColor;
-                ctx.lineWidth = currentThickness;
-                ctx.stroke();
+                // Ignore sudden glitched teleports across the screen greater than 180 pixels
+                const jumpDistance = Math.sqrt((posX - lastX)**2 + (posY - lastY)**2);
+                
+                if (jumpDistance < 180) {
+                    ctx.beginPath();
+                    ctx.moveTo(lastX, lastY);
+                    ctx.lineTo(posX, posY);
+                    ctx.strokeStyle = currentColor;
+                    ctx.lineWidth = currentThickness;
+                    ctx.stroke();
+                }
             }
             
             lastX = posX;
@@ -248,7 +246,6 @@ function processFrame() {
     requestAnimationFrame(processFrame);
 }
 
-// Low resource native camera engine initialization modules pipeline
 async function initSystem() {
     try {
         const stream = await navigator.mediaDevices.getUserMedia({
@@ -259,7 +256,7 @@ async function initSystem() {
         video.play();
         requestAnimationFrame(processFrame);
     } catch (err) {
-        statusDiv.innerText = "⚠️ Camera Blocked! Set browser app settings authorizations.";
+        statusDiv.innerText = "⚠️ Camera Blocked! Open device permissions settings panels.";
     }
 }
 
