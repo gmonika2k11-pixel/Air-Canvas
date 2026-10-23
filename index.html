@@ -3,156 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Neon Air Canvas - Cloudflare Edition</title>
-    
-    <!-- Hyper-Performance Fail-Safe CDN Links hosted by Cloudflare -->
-    <script src="https://cloudflare.com" crossorigin="anonymous"></script>
-    <script src="https://cloudflare.com" crossorigin="anonymous"></script>
-    
+    <title>AI Virtual Canvas for Tablet</title>
+    <!-- Load MediaPipe and Camera Utils via CDN -->
+    <script src="https://jsdelivr.net" crossorigin="anonymous"></script>
+    <script src="https://jsdelivr.net" crossorigin="anonymous"></script>
     <style>
-        body { 
-            margin: 0; 
-            padding: 0; 
-            overflow: hidden; 
-            background: #111111; 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            user-select: none;
-            -webkit-user-select: none;
-        }
-        #container { 
-            position: relative; 
-            width: 100vw; 
-            height: 100vh; 
-        }
-        video { 
-            transform: scaleX(-1); 
-            position: absolute; 
-            width: 100%; 
-            height: 100%; 
-            object-fit: cover; 
-            opacity: 0.2; 
-            z-index: 1;
-        }
-        canvas { 
-            position: absolute; 
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            height: 100%; 
-            transform: scaleX(-1); 
-            z-index: 2;
-        }
-        #loadingOverlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #111111;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
-            transition: opacity 0.5s ease;
-        }
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid rgba(255, 255, 255, 0.1);
-            border-top: 5px solid #FF3399;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        #loadingText {
-            color: white;
-            margin-top: 20px;
-            font-size: 16px;
-            text-align: center;
-            line-height: 1.6;
-        }
-        #menu { 
-            position: absolute; 
-            top: 20px; 
-            left: 50%; 
-            transform: translateX(-50%); 
-            display: flex; 
-            gap: 12px; 
-            background: rgba(255, 255, 255, 0.15); 
-            padding: 10px 20px; 
-            border-radius: 50px; 
-            backdrop-filter: blur(15px); 
-            -webkit-backdrop-filter: blur(15px);
-            z-index: 10; 
-            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        .btn { 
-            width: 44px; 
-            height: 44px; 
-            border-radius: 50%; 
-            border: 2px solid white; 
-            cursor: pointer; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            font-size: 18px;
-            transition: transform 0.1s ease;
-        }
-        .btn:active { transform: scale(0.85); }
-        #red    { background: #FF3333; box-shadow: 0 0 10px #FF3333; }
-        #orange { background: #FF9933; box-shadow: 0 0 10px #FF9933; }
-        #yellow { background: #FFFF33; box-shadow: 0 0 10px #FFFF33; }
-        #green  { background: #33FF33; box-shadow: 0 0 10px #33FF33; }
-        #cyan   { background: #33FFFF; box-shadow: 0 0 10px #33FFFF; }
-        #blue   { background: #3333FF; box-shadow: 0 0 10px #3333FF; }
-        #purple { background: #9933FF; box-shadow: 0 0 10px #9933FF; }
-        #pink   { background: #FF3399; box-shadow: 0 0 10px #FF3399; }
-        #eraser { background: #444444; border-color: #ffffff; }
-        #clear  { background: #222222; border-color: #FF3333; }
-        #status { 
-            position: absolute; 
-            bottom: 20px; 
-            left: 20px; 
-            color: white; 
-            background: rgba(0, 0, 0, 0.75); 
-            padding: 12px 24px; 
-            border-radius: 30px; 
-            font-weight: 500;
-            z-index: 10; 
-            border: 1px solid rgba(255,255,255,0.15);
-        }
+        body { margin: 0; padding: 0; overflow: hidden; background: #111; font-family: Arial, sans-serif; }
+        #container { position: relative; width: 100vw; height: 100vh; }
+        video { transform: scaleX(-1); position: absolute; width: 100%; height: 100%; object-fit: cover; opacity: 0.3; }
+        canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; transform: scaleX(-1); }
+        #menu { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 15px; background: rgba(255,255,255,0.2); padding: 10px 20px; border-radius: 50px; backdrop-filter: blur(10px); z-index: 10; }
+        .btn { width: 50px; height: 50px; border-radius: 50%; border: 3px solid white; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; }
+        #red { background: red; } #blue { background: blue; } #green { background: green; } #eraser { background: #555; font-size: 12px; }
+        #clear { background: black; border-color: red; font-size: 12px; }
+        #status { position: absolute; bottom: 20px; left: 20px; color: white; background: rgba(0,0,0,0.6); padding: 8px 15px; border-radius: 5px; z-index: 10; }
     </style>
 </head>
 <body>
 
 <div id="container">
-    <div id="loadingOverlay">
-        <div class="spinner"></div>
-        <div id="loadingText">Connecting to Cloudflare Core Networks...<br><small style="color: #888; font-size: 12px;">Initializing machine learning pipelines...</small></div>
-    </div>
-
+    <!-- Camera Feed (Hidden or faint background) -->
     <video id="webcam" autoplay playsinline></video>
+    <!-- Drawing Canvas -->
     <canvas id="paintCanvas"></canvas>
     
+    <!-- UI Menu -->
     <div id="menu">
-        <div class="btn" id="red" onclick="setColor('#FF3333', 'Neon Red')"></div>
-        <div class="btn" id="orange" onclick="setColor('#FF9933', 'Neon Orange')"></div>
-        <div class="btn" id="yellow" onclick="setColor('#FFFF33', 'Neon Yellow')"></div>
-        <div class="btn" id="green" onclick="setColor('#33FF33', 'Neon Green')"></div>
-        <div class="btn" id="cyan" onclick="setColor('#33FFFF', 'Neon Cyan')"></div>
-        <div class="btn" id="blue" onclick="setColor('#3333FF', 'Neon Blue')"></div>
-        <div class="btn" id="purple" onclick="setColor('#9933FF', 'Neon Purple')"></div>
-        <div class="btn" id="pink" onclick="setColor('#FF3399', 'Neon Pink')"></div>
-        <div class="btn" id="eraser" onclick="setEraser()">🧼</div>
+        <div class="btn" id="red" onclick="setColor('red')"></div>
+        <div class="btn" id="blue" onclick="setColor('blue')"></div>
+        <div class="btn" id="green" onclick="setColor('green')"></div>
+        <div class="btn" id="eraser" onclick="setColor('erase')">🧼</div>
         <div class="btn" id="clear" onclick="clearCanvas()">❌</div>
     </div>
 
-    <div id="status">System Status: Preparing Data Stream Pipelines...</div>
+    <div id="status">Gesture Status: Detecting Hand...</div>
 </div>
 
 <script>
@@ -160,72 +44,67 @@ const video = document.getElementById('webcam');
 const canvas = document.getElementById('paintCanvas');
 const ctx = canvas.getContext('2d');
 const statusDiv = document.getElementById('status');
-const loadingOverlay = document.getElementById('loadingOverlay');
-const loadingText = document.getElementById('loadingText');
 
-let currentColor = '#FF3333'; 
-let currentThickness = 8;
+let brushColor = 'red';
+let brushThickness = 8;
 let lastX = 0, lastY = 0;
 let isDrawing = false;
 
-function resizeCanvas() {
+// Resize canvas to fill the screen layout
+function resize() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
-    ctx.shadowBlur = 8;
-    ctx.shadowColor = currentColor;
 }
-window.addEventListener('resize', resizeCanvas);
-resizeCanvas();
+window.addEventListener('resize', resize);
+resize();
 
-function setColor(hexColor, name) {
-    currentColor = hexColor;
-    currentThickness = 8;
-    ctx.shadowBlur = 8;
-    ctx.shadowColor = currentColor;
-    statusDiv.innerText = `Active Tool: ${name}`;
-}
-
-function setEraser() {
-    currentColor = '#111111'; 
-    currentThickness = 60;     
-    ctx.shadowBlur = 0;
-    statusDiv.innerText = "Active Tool: Eraser Pad";
+function setColor(color) {
+    if (color === 'erase') {
+        brushColor = '#111'; // Match body background to act as an eraser
+        brushThickness = 40;
+    } else {
+        brushColor = color;
+        brushThickness = 8;
+    }
 }
 
 function clearCanvas() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    statusDiv.innerText = "Canvas Cleared!";
 }
 
+// Handle tracking results from MediaPipe
 function onResults(results) {
-    if (loadingOverlay.style.opacity !== "0") {
-        loadingOverlay.style.opacity = "0";
-        setTimeout(() => loadingOverlay.style.display = "none", 500);
-    }
-
     if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
         const hand = results.multiHandLandmarks[0];
         
+        // Landmark 8 = Index Tip, Landmark 12 = Middle Tip
         const indexTip = hand[8];
         const middleTip = hand[12];
         const indexPip = hand[6];
         const middlePip = hand[10];
 
+        // Convert normalized coordinates [0,1] to actual screen pixels
         const x = indexTip.x * canvas.width;
         const y = indexTip.y * canvas.height;
 
+        // Gestures Logic: Finger Up check (Y coordinate decreases as hand goes up)
         const indexUp = indexTip.y < indexPip.y;
         const middleUp = middleTip.y < middlePip.y;
 
         if (indexUp && middleUp) {
-            statusDiv.innerText = "Status: 🖐️ Navigation Mode (Paused)";
+            // SELECTION MODE (Two fingers up) -> Stop drawing
+            statusDiv.innerText = "Status: Selection Mode (Hover to change colors)";
             isDrawing = false;
+            
+            // Check button collision based on screen positions if needed, 
+            // or let visitors click the UI physically with their left hand!
         } else if (indexUp && !middleUp) {
-            statusDiv.innerText = "Status: ✍️ Drawing Air Lines";
-            ctx.strokeStyle = currentColor;
-            ctx.lineWidth = currentThickness;
+            // DRAWING MODE (Only Index finger up)
+            statusDiv.innerText = "Status: ✍️ Drawing";
+            ctx.strokeStyle = brushColor;
+            ctx.lineWidth = brushThickness;
             
             if (!isDrawing) {
                 isDrawing = true;
@@ -242,59 +121,33 @@ function onResults(results) {
             lastY = y;
         }
     } else {
-        statusDiv.innerText = "Status: Idle - Hand Out of Frame";
+        statusDiv.innerText = "Status: No hand detected";
         isDrawing = false;
     }
 }
 
-// 🔥 Alternate Fallback Paths Configured for Cloudflare Storage Packages
+// Initialise MediaPipe Hands Model
 const hands = new Hands({
-    locateFile: (file) => `https://cloudflare.com{file}`
+    locateFile: (file) => `https://jsdelivr.net{file}`
 });
-
 hands.setOptions({
     maxNumHands: 1,
-    modelComplexity: 0, 
-    minDetectionConfidence: 0.5, 
-    minTrackingConfidence: 0.5   
+    modelComplexity: 1,
+    minDetectionConfidence: 0.7,
+    minTrackingConfidence: 0.7
 });
 hands.onResults(onResults);
 
-async function initSystem() {
-    try {
-        loadingText.innerHTML = "Requesting System Camera Authorization...<br><small style='color:#aaa;'>Please tap Allow on the pop-up window.</small>";
-        
-        const stream = await navigator.mediaDevices.getUserMedia({
-            video: {
-                facingMode: "user",
-                width: { ideal: 640 },
-                height: { ideal: 480 }
-            },
-            audio: false
-        });
-        
-        video.srcObject = stream;
-        video.play();
-        
-        loadingText.innerHTML = "Compiling Vision Pipelines...<br><small style='color:#aaa;'>Booting localized tracking engines...</small>";
-
-        const camera = new Camera(video, {
-            onFrame: async () => {
-                await hands.send({image: video});
-            },
-            width: 640,
-            height: 480
-        });
-        camera.start();
-        
-    } catch (err) {
-        console.error(err);
-        loadingText.innerHTML = "<span style='color:#ff3333;'>⚠️ ACCESS INTERRUPTED</span><br><small style='color:#ccc;'>Unlock browser app camera permissions in tablet settings.</small>";
-    }
-}
-
-window.onload = initSystem;
+// Stream tablet camera to the app
+const camera = new Camera(video, {
+    onFrame: async () => {
+        await hands.send({image: video});
+    },
+    width: 1280,
+    height: 720
+});
+camera.start();
 </script>
+
 </body>
 </html>
-
