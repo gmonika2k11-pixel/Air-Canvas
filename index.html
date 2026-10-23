@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AI Air Canvas</title>
+    <title>AI Air Canvas - T515 High Performance HSV Edition</title>
     <style>
+        /* Core Document Layout Styling */
         body { 
             margin: 0; 
             padding: 0; 
@@ -19,15 +20,19 @@
             width: 100vw; 
             height: 100vh; 
         }
+        
+        /* Video Background Feed Setup */
         video { 
             transform: scaleX(-1); 
             position: absolute; 
             width: 100%; 
             height: 100%; 
             object-fit: cover; 
-            opacity: 0.4; 
+            opacity: 0.35; 
             z-index: 1;
         }
+        
+        /* Transparent Canvas Sketching Layer Pane */
         canvas { 
             position: absolute; 
             top: 0; 
@@ -38,7 +43,7 @@
             z-index: 2;
         }
         
-        /* TARGET CALIBRATION BOX */
+        /* TARGET CALIBRATION OVERLAY SQUARE */
         #targetBox {
             position: absolute;
             top: 50%;
@@ -53,6 +58,7 @@
             pointer-events: none;
         }
 
+        /* Floating Responsive Rainbow Button Menu Layout */
         #menu { 
             position: absolute; 
             top: 20px; 
@@ -76,7 +82,11 @@
             border: 2px solid white; 
             cursor: pointer; 
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            transition: transform 0.1s ease;
         }
+        .btn:active { transform: scale(0.85); }
+        
+        /* Custom Neon Colors Configurations */
         #red    { background: #FF3333; box-shadow: 0 0 10px #FF3333; }
         #orange { background: #FF9933; box-shadow: 0 0 10px #FF9933; }
         #yellow { background: #FFFF33; box-shadow: 0 0 10px #FFFF33; }
@@ -88,6 +98,7 @@
         #eraser { background: #444444; border-color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 18px; }
         #clear  { background: #222222; border-color: #FF3333; display: flex; align-items: center; justify-content: center; font-size: 18px; }
         
+        /* Status Telemetry Control HUD Window */
         #status { 
             position: absolute; 
             bottom: 20px; 
@@ -119,10 +130,14 @@
 <body>
 
 <div id="container">
+    <!-- Spatial Tracking Target Guide Marker Box -->
     <div id="targetBox"></div>
+    
+    <!-- Active Camera and Canvas Pipelines Layers -->
     <video id="webcam" autoplay playsinline></video>
     <canvas id="paintCanvas"></canvas>
     
+    <!-- User Interactivity Interface Elements Menu -->
     <div id="menu">
         <div class="btn" id="red" onclick="setColor('#FF3333', 'Neon Red')"></div>
         <div class="btn" id="orange" onclick="setColor('#FF9933', 'Neon Orange')"></div>
@@ -136,7 +151,8 @@
         <div class="btn" id="clear" onclick="clearCanvas()">❌</div>
     </div>
 
-    <div id="status">Align your colored pointer inside the center square and tap Calibrate</div>
+    <!-- Active Telemetry Information Panels -->
+    <div id="status">Put color tip inside square, then tap Calibrate Color</div>
     <button id="calibrateBtn" onclick="startCalibration()">🎯 Calibrate Color</button>
 </div>
 
@@ -147,17 +163,18 @@ const ctx = canvas.getContext('2d');
 const statusDiv = document.getElementById('status');
 const targetBox = document.getElementById('targetBox');
 
+// Core Global Configuration Variables
 let currentColor = '#FF3333'; 
 let currentThickness = 8;
 let lastX = 0, lastY = 0;
 let wasTracking = false;
 
-// Robust HSV Tracking Parameters (Defaults to a placeholder neon range)
+// Robust HSV Target Vector Ranges Defaults
 let targetH = 0, targetS = 0, targetV = 0;
 let isCalibrated = false;
 let isCalibrating = false;
 
-// Converts RGB values to the stable HSV color wheel range
+// Translates raw RGB pixel matrix vectors into mathematical HSV spaces
 function rgbToHsv(r, g, b) {
     r /= 255; g /= 255; b /= 255;
     let max = Math.max(r, g, b), min = Math.min(r, g, b);
@@ -197,7 +214,7 @@ function setColor(hexColor, name) {
 }
 
 function setEraser() {
-    currentColor = '#111111'; 
+    currentColor = '#111111'; // Canvas color mask mapping overlay structure
     currentThickness = 60;     
     ctx.shadowBlur = 0;
     statusDiv.innerText = "Active Tool: Eraser Pad";
@@ -210,16 +227,19 @@ function clearCanvas() {
 
 function startCalibration() {
     isCalibrating = true;
-    statusDiv.innerText = "Capturing central point color properties...";
+    statusDiv.innerText = "Analyzing central marker zone parameters...";
 }
 
+// Low resource real time processing frames loop running natively on T515 hardware
 function processFrame() {
     if (video.readyState === video.HAVE_ENOUGH_DATA) {
+        // Offscreen tracking array extraction buffer
         const tempCanvas = document.createElement('canvas');
-        tempCanvas.width = 160; // Ultra downscaled to fit Tab T515 hardware limits
+        tempCanvas.width = 160; // Matrix scale values map low footprint grid points safely
         tempCanvas.height = 120;
         const tempCtx = tempCanvas.getContext('2d');
         
+        // Render flipped raw video streams onto buffer context configurations
         tempCtx.translate(tempCanvas.width, 0);
         tempCtx.scale(-1, 1);
         tempCtx.drawImage(video, 0, 0, tempCanvas.width, tempCanvas.height);
@@ -230,7 +250,7 @@ function processFrame() {
         let sumX = 0, sumY = 0, count = 0;
         
         if (isCalibrating) {
-            // Sample a 4x4 cluster directly out of the center box frame coordinates
+            // Process target midpoint metrics values layers block directly
             let midX = Math.floor(tempCanvas.width / 2);
             let midY = Math.floor(tempCanvas.height / 2);
             let idx = (midY * tempCanvas.width + midX) * 4;
@@ -242,8 +262,8 @@ function processFrame() {
             
             isCalibrating = false;
             isCalibrated = true;
-            targetBox.style.borderColor = "#33ff33"; // Switch frame border to green
-            statusDiv.innerText = "Color Locked! Step back and draw.";
+            targetBox.style.borderColor = "#33ff33"; // Green validation state box layout change
+            statusDiv.innerText = "Color Locked Successfully! Step back and draw.";
         }
 
         if (isCalibrated) {
@@ -252,27 +272,7 @@ function processFrame() {
                     const idx = (y * tempCanvas.width + x) * 4;
                     const hsv = rgbToHsv(data[idx], data[idx+1], data[idx+2]);
                     
-                    // Robust check parameters isolating the exact color type (Hue) away from shadow interference
-                    const hDist = Math.min(Math.abs(hsv[0] - targetH), 360 - Math.abs(hsv[0] - targetH));
-                    
-                    if (hDist < 20 && hsv[1] > 25 && hsv[2] > 20) {
-                        sumX += x;
-                        sumY += y;
-                        count++;
-                    }
-                }
-            }
-            
-            // Noise filtering dimensions block matching a fingertip cap profile size
-            if (count > 8 && count < 350) {
-                const posX = (sumX / count) / tempCanvas.width * canvas.width;
-                const posY = (sumY / count) / tempCanvas.height * canvas.height;
-                
-                if (wasTracking) {
-                    const jumpDistance = Math.sqrt((posX - lastX)**2 + (posY - lastY)**2);
-                    if (jumpDistance < 150) {
-                        ctx.beginPath();
-                        ctx.moveTo(lastX, lastY);
-                        </script>
+                    // Core Hue angular distance separation evaluation routines
+                    </script>
 </body>
 </html>
