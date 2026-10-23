@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AI Air Canvas - T515 High Performance HSV Edition</title>
+    <title>AI Air Canvas - Anti Glitch T515 Edition</title>
     <style>
-        /* Core Document Layout Styling */
         body { 
             margin: 0; 
             padding: 0; 
@@ -20,8 +19,6 @@
             width: 100vw; 
             height: 100vh; 
         }
-        
-        /* Video Background Feed Setup */
         video { 
             transform: scaleX(-1); 
             position: absolute; 
@@ -31,8 +28,6 @@
             opacity: 0.35; 
             z-index: 1;
         }
-        
-        /* Transparent Canvas Sketching Layer Pane */
         canvas { 
             position: absolute; 
             top: 0; 
@@ -42,23 +37,6 @@
             transform: scaleX(-1); 
             z-index: 2;
         }
-        
-        /* TARGET CALIBRATION OVERLAY SQUARE */
-        #targetBox {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 60px;
-            height: 60px;
-            border: 4px dashed #ff3399;
-            border-radius: 8px;
-            z-index: 5;
-            box-shadow: 0 0 15px rgba(255, 51, 153, 0.5);
-            pointer-events: none;
-        }
-
-        /* Floating Responsive Rainbow Button Menu Layout */
         #menu { 
             position: absolute; 
             top: 20px; 
@@ -82,11 +60,7 @@
             border: 2px solid white; 
             cursor: pointer; 
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            transition: transform 0.1s ease;
         }
-        .btn:active { transform: scale(0.85); }
-        
-        /* Custom Neon Colors Configurations */
         #red    { background: #FF3333; box-shadow: 0 0 10px #FF3333; }
         #orange { background: #FF9933; box-shadow: 0 0 10px #FF9933; }
         #yellow { background: #FFFF33; box-shadow: 0 0 10px #FFFF33; }
@@ -98,13 +72,12 @@
         #eraser { background: #444444; border-color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 18px; }
         #clear  { background: #222222; border-color: #FF3333; display: flex; align-items: center; justify-content: center; font-size: 18px; }
         
-        /* Status Telemetry Control HUD Window */
         #status { 
             position: absolute; 
             bottom: 20px; 
             left: 20px; 
             color: white; 
-            background: rgba(0, 0, 0, 0.85); 
+            background: rgba(0, 0, 0, 0.8); 
             padding: 12px 24px; 
             border-radius: 30px; 
             font-weight: 500;
@@ -130,14 +103,9 @@
 <body>
 
 <div id="container">
-    <!-- Spatial Tracking Target Guide Marker Box -->
-    <div id="targetBox"></div>
-    
-    <!-- Active Camera and Canvas Pipelines Layers -->
     <video id="webcam" autoplay playsinline></video>
     <canvas id="paintCanvas"></canvas>
     
-    <!-- User Interactivity Interface Elements Menu -->
     <div id="menu">
         <div class="btn" id="red" onclick="setColor('#FF3333', 'Neon Red')"></div>
         <div class="btn" id="orange" onclick="setColor('#FF9933', 'Neon Orange')"></div>
@@ -151,8 +119,7 @@
         <div class="btn" id="clear" onclick="clearCanvas()">❌</div>
     </div>
 
-    <!-- Active Telemetry Information Panels -->
-    <div id="status">Put color tip inside square, then tap Calibrate Color</div>
+    <div id="status">Put color cap on finger -> Tap Calibrate -> Hold in screen center</div>
     <button id="calibrateBtn" onclick="startCalibration()">🎯 Calibrate Color</button>
 </div>
 
@@ -161,38 +128,16 @@ const video = document.getElementById('webcam');
 const canvas = document.getElementById('paintCanvas');
 const ctx = canvas.getContext('2d');
 const statusDiv = document.getElementById('status');
-const targetBox = document.getElementById('targetBox');
 
-// Core Global Configuration Variables
 let currentColor = '#FF3333'; 
 let currentThickness = 8;
 let lastX = 0, lastY = 0;
 let wasTracking = false;
 
-// Robust HSV Target Vector Ranges Defaults
-let targetH = 0, targetS = 0, targetV = 0;
-let isCalibrated = false;
+// Setup default tracking colors (Optimized target bounds)
+let targetR = 0, targetG = 180, targetB = 255; // Defaults to a strong bright neon color template
+let colorThreshold = 35; // Lower values mean tighter checking (prevents background noise matching)
 let isCalibrating = false;
-
-// Translates raw RGB pixel matrix vectors into mathematical HSV spaces
-function rgbToHsv(r, g, b) {
-    r /= 255; g /= 255; b /= 255;
-    let max = Math.max(r, g, b), min = Math.min(r, g, b);
-    let h, s, v = max;
-    let d = max - min;
-    s = max === 0 ? 0 : d / max;
-    if (max === min) {
-        h = 0;
-    } else {
-        switch (max) {
-            case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-            case g: h = (b - r) / d + 2; break;
-            case b: h = (r - g) / d + 4; break;
-        }
-        h /= 6;
-    }
-    return [h * 360, s * 100, v * 100];
-}
 
 function resizeCanvas() {
     canvas.width = window.innerWidth;
@@ -214,7 +159,7 @@ function setColor(hexColor, name) {
 }
 
 function setEraser() {
-    currentColor = '#111111'; // Canvas color mask mapping overlay structure
+    currentColor = '#111111'; 
     currentThickness = 60;     
     ctx.shadowBlur = 0;
     statusDiv.innerText = "Active Tool: Eraser Pad";
@@ -227,19 +172,16 @@ function clearCanvas() {
 
 function startCalibration() {
     isCalibrating = true;
-    statusDiv.innerText = "Analyzing central marker zone parameters...";
+    statusDiv.innerText = "🎯 Tracking Calibration Locked! Place target color spot at center...";
 }
 
-// Low resource real time processing frames loop running natively on T515 hardware
 function processFrame() {
     if (video.readyState === video.HAVE_ENOUGH_DATA) {
-        // Offscreen tracking array extraction buffer
         const tempCanvas = document.createElement('canvas');
-        tempCanvas.width = 160; // Matrix scale values map low footprint grid points safely
+        tempCanvas.width = 160; 
         tempCanvas.height = 120;
         const tempCtx = tempCanvas.getContext('2d');
         
-        // Render flipped raw video streams onto buffer context configurations
         tempCtx.translate(tempCanvas.width, 0);
         tempCtx.scale(-1, 1);
         tempCtx.drawImage(video, 0, 0, tempCanvas.width, tempCanvas.height);
@@ -250,29 +192,76 @@ function processFrame() {
         let sumX = 0, sumY = 0, count = 0;
         
         if (isCalibrating) {
-            // Process target midpoint metrics values layers block directly
-            let midX = Math.floor(tempCanvas.width / 2);
-            let midY = Math.floor(tempCanvas.height / 2);
-            let idx = (midY * tempCanvas.width + midX) * 4;
-            
-            let hsv = rgbToHsv(data[idx], data[idx+1], data[idx+2]);
-            targetH = hsv[0];
-            targetS = hsv[1];
-            targetV = hsv[2];
-            
+            const midIdx = ((tempCanvas.height / 2) * tempCanvas.width + (tempCanvas.width / 2)) * 4;
+            targetR = data[midIdx];
+            targetG = data[midIdx + 1];
+            targetB = data[midIdx + 2];
             isCalibrating = false;
-            isCalibrated = true;
-            targetBox.style.borderColor = "#33ff33"; // Green validation state box layout change
-            statusDiv.innerText = "Color Locked Successfully! Step back and draw.";
+            statusDiv.innerText = "Calibration Done! Ready to Draw.";
         }
 
-        if (isCalibrated) {
-            for (let y = 0; y < tempCanvas.height; y++) {
-                for (let x = 0; x < tempCanvas.width; x++) {
-                    const idx = (y * tempCanvas.width + x) * 4;
-                    const hsv = rgbToHsv(data[idx], data[idx+1], data[idx+2]);
-                    
-                    // Core Hue angular distance separation evaluation routines
-                    </script>
+        for (let y = 0; y < tempCanvas.height; y++) {
+            for (let x = 0; x < tempCanvas.width; x++) {
+                const idx = (y * tempCanvas.width + x) * 4;
+                const r = data[idx];
+                const g = data[idx + 1];
+                const b = data[idx + 2];
+                
+                const dist = Math.sqrt((r - targetR)**2 + (g - targetG)**2 + (b - targetB)**2);
+                if (dist < colorThreshold) {
+                    sumX += x;
+                    sumY += y;
+                    count++;
+                }
+            }
+        }
+        
+        // 🔥 ANTI-GLITCH SAFETY MECHANISMS STAGE
+        // Limits tracking strictly between 15 pixels (finger point) and 400 pixels (ignores background wall blocks)
+        if (count > 15 && count < 400) {
+            const posX = (sumX / count) / tempCanvas.width * canvas.width;
+            const posY = (sumY / count) / tempCanvas.height * canvas.height;
+            
+            if (wasTracking) {
+                // Ignore sudden glitched teleports across the screen greater than 180 pixels
+                const jumpDistance = Math.sqrt((posX - lastX)**2 + (posY - lastY)**2);
+                
+                if (jumpDistance < 180) {
+                    ctx.beginPath();
+                    ctx.moveTo(lastX, lastY);
+                    ctx.lineTo(posX, posY);
+                    ctx.strokeStyle = currentColor;
+                    ctx.lineWidth = currentThickness;
+                    ctx.stroke();
+                }
+            }
+            
+            lastX = posX;
+            lastY = posY;
+            wasTracking = true;
+        } else {
+            wasTracking = false;
+        }
+    }
+    requestAnimationFrame(processFrame);
+}
+
+async function initSystem() {
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: "user", width: 640, height: 480 },
+            audio: false
+        });
+        video.srcObject = stream;
+        video.play();
+        requestAnimationFrame(processFrame);
+    } catch (err) {
+        statusDiv.innerText = "⚠️ Camera Blocked! Open device permissions settings panels.";
+    }
+}
+
+window.onload = initSystem;
+</script>
+
 </body>
 </html>
