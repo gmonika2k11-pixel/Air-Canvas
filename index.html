@@ -2,41 +2,127 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Virtual Canvas for Tablet</title>
-    <!-- Load MediaPipe and Camera Utils via CDN -->
-    <script src="https://jsdelivr.net" crossorigin="anonymous"></script>
-    <script src="https://jsdelivr.net" crossorigin="anonymous"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AI Air Canvas</title>
     <style>
-        body { margin: 0; padding: 0; overflow: hidden; background: #111; font-family: Arial, sans-serif; }
-        #container { position: relative; width: 100vw; height: 100vh; }
-        video { transform: scaleX(-1); position: absolute; width: 100%; height: 100%; object-fit: cover; opacity: 0.3; }
-        canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; transform: scaleX(-1); }
-        #menu { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 15px; background: rgba(255,255,255,0.2); padding: 10px 20px; border-radius: 50px; backdrop-filter: blur(10px); z-index: 10; }
-        .btn { width: 50px; height: 50px; border-radius: 50%; border: 3px solid white; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; }
-        #red { background: red; } #blue { background: blue; } #green { background: green; } #eraser { background: #555; font-size: 12px; }
-        #clear { background: black; border-color: red; font-size: 12px; }
-        #status { position: absolute; bottom: 20px; left: 20px; color: white; background: rgba(0,0,0,0.6); padding: 8px 15px; border-radius: 5px; z-index: 10; }
+        body { 
+            margin: 0; 
+            padding: 0; 
+            overflow: hidden; 
+            background: #111111; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        #container { 
+            position: relative; 
+            width: 100vw; 
+            height: 100vh; 
+        }
+        /* Video background feed layer */
+        video { 
+            transform: scaleX(-1); 
+            position: absolute; 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; 
+            opacity: 0.35; 
+            z-index: 1;
+        }
+        /* Visual drawing window pane */
+        canvas { 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            transform: scaleX(-1); 
+            z-index: 2;
+        }
+        #menu { 
+            position: absolute; 
+            top: 20px; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            display: flex; 
+            gap: 12px; 
+            background: rgba(255, 255, 255, 0.2); 
+            padding: 10px 20px; 
+            border-radius: 50px; 
+            backdrop-filter: blur(10px); 
+            -webkit-backdrop-filter: blur(10px);
+            z-index: 10; 
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .btn { 
+            width: 44px; 
+            height: 44px; 
+            border-radius: 50%; 
+            border: 2px solid white; 
+            cursor: pointer; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+        #red    { background: #FF3333; box-shadow: 0 0 10px #FF3333; }
+        #orange { background: #FF9933; box-shadow: 0 0 10px #FF9933; }
+        #yellow { background: #FFFF33; box-shadow: 0 0 10px #FFFF33; }
+        #green  { background: #33FF33; box-shadow: 0 0 10px #33FF33; }
+        #cyan   { background: #33FFFF; box-shadow: 0 0 10px #33FFFF; }
+        #blue   { background: #3333FF; box-shadow: 0 0 10px #3333FF; }
+        #purple { background: #9933FF; box-shadow: 0 0 10px #9933FF; }
+        #pink   { background: #FF3399; box-shadow: 0 0 10px #FF3399; }
+        #eraser { background: #444444; border-color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        #clear  { background: #222222; border-color: #FF3333; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        
+        #status { 
+            position: absolute; 
+            bottom: 20px; 
+            left: 20px; 
+            color: white; 
+            background: rgba(0, 0, 0, 0.8); 
+            padding: 12px 24px; 
+            border-radius: 30px; 
+            font-weight: 500;
+            z-index: 10; 
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+        #calibrateBtn {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: #ff3399;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-weight: bold;
+            z-index: 10;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255,51,153,0.4);
+        }
     </style>
 </head>
 <body>
 
 <div id="container">
-    <!-- Camera Feed (Hidden or faint background) -->
     <video id="webcam" autoplay playsinline></video>
-    <!-- Drawing Canvas -->
     <canvas id="paintCanvas"></canvas>
     
-    <!-- UI Menu -->
     <div id="menu">
-        <div class="btn" id="red" onclick="setColor('red')"></div>
-        <div class="btn" id="blue" onclick="setColor('blue')"></div>
-        <div class="btn" id="green" onclick="setColor('green')"></div>
-        <div class="btn" id="eraser" onclick="setColor('erase')">🧼</div>
+        <div class="btn" id="red" onclick="setColor('#FF3333', 'Neon Red')"></div>
+        <div class="btn" id="orange" onclick="setColor('#FF9933', 'Neon Orange')"></div>
+        <div class="btn" id="yellow" onclick="setColor('#FFFF33', 'Neon Yellow')"></div>
+        <div class="btn" id="green" onclick="setColor('#33FF33', 'Neon Green')"></div>
+        <div class="btn" id="cyan" onclick="setColor('#33FFFF', 'Neon Cyan')"></div>
+        <div class="btn" id="blue" onclick="setColor('#3333FF', 'Neon Blue')"></div>
+        <div class="btn" id="purple" onclick="setColor('#9933FF', 'Neon Purple')"></div>
+        <div class="btn" id="pink" onclick="setColor('#FF3399', 'Neon Pink')"></div>
+        <div class="btn" id="eraser" onclick="setEraser()">🧼</div>
         <div class="btn" id="clear" onclick="clearCanvas()">❌</div>
     </div>
 
-    <div id="status">Gesture Status: Detecting Hand...</div>
+    <div id="status">Tap Calibrate, then point target color at camera center</div>
+    <button id="calibrateBtn" onclick="startCalibration()">🎯 Calibrate Color</button>
 </div>
 
 <script>
@@ -45,108 +131,139 @@ const canvas = document.getElementById('paintCanvas');
 const ctx = canvas.getContext('2d');
 const statusDiv = document.getElementById('status');
 
-let brushColor = 'red';
-let brushThickness = 8;
+let currentColor = '#FF3333'; 
+let currentThickness = 8;
 let lastX = 0, lastY = 0;
-let isDrawing = false;
+let wasTracking = false;
 
-// Resize canvas to fill the screen layout
-function resize() {
+// Target color parameters (Defaults to tracking neon red caps/tape outlines)
+let targetR = 255, targetG = 50, targetB = 50;
+let colorThreshold = 45; 
+let isCalibrating = false;
+
+function resizeCanvas() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
+    ctx.shadowBlur = 8;
+    ctx.shadowColor = currentColor;
 }
-window.addEventListener('resize', resize);
-resize();
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
 
-function setColor(color) {
-    if (color === 'erase') {
-        brushColor = '#111'; // Match body background to act as an eraser
-        brushThickness = 40;
-    } else {
-        brushColor = color;
-        brushThickness = 8;
-    }
+function setColor(hexColor, name) {
+    currentColor = hexColor;
+    currentThickness = 8;
+    ctx.shadowBlur = 8;
+    ctx.shadowColor = currentColor;
+    statusDiv.innerText = `Active Color: ${name}`;
+}
+
+function setEraser() {
+    currentColor = '#111111'; 
+    currentThickness = 60;     
+    ctx.shadowBlur = 0;
+    statusDiv.innerText = "Active Tool: Eraser Pad";
 }
 
 function clearCanvas() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    statusDiv.innerText = "Canvas Cleared!";
 }
 
-// Handle tracking results from MediaPipe
-function onResults(results) {
-    if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
-        const hand = results.multiHandLandmarks[0];
+function startCalibration() {
+    isCalibrating = true;
+    statusDiv.innerText = "Hold your colored finger tip directly in the center for 2 seconds...";
+}
+
+// Processing Frame Loop targeting 2GB RAM device optimization limitations
+function processFrame() {
+    if (video.readyState === video.HAVE_ENOUGH_DATA) {
+        // Create an offscreen buffer canvas step minimizing processing latency memory leaps
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = 160; // Downscaled matrix grid tracking prevents T515 CPU thrashing
+        tempCanvas.height = 120;
+        const tempCtx = tempCanvas.getContext('2d');
         
-        // Landmark 8 = Index Tip, Landmark 12 = Middle Tip
-        const indexTip = hand[8];
-        const middleTip = hand[12];
-        const indexPip = hand[6];
-        const middlePip = hand[10];
+        // Render flipped video frames onto target array layouts
+        tempCtx.translate(tempCanvas.width, 0);
+        tempCtx.scale(-1, 1);
+        tempCtx.drawImage(video, 0, 0, tempCanvas.width, tempCanvas.height);
+        
+        const frameData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+        const data = frameData.data;
+        
+        let sumX = 0, sumY = 0, count = 0;
+        
+        if (isCalibrating) {
+            // Read target midpoint metrics vectors blocks directly
+            const midIdx = ((tempCanvas.height / 2) * tempCanvas.width + (tempCanvas.width / 2)) * 4;
+            targetR = data[midIdx];
+            targetG = data[midIdx + 1];
+            targetB = data[midIdx + 2];
+            isCalibrating = false;
+            statusDiv.innerText = `Calibrated successfully! Color Captured: RGB(${targetR},${targetG},${targetB})`;
+        }
 
-        // Convert normalized coordinates [0,1] to actual screen pixels
-        const x = indexTip.x * canvas.width;
-        const y = indexTip.y * canvas.height;
-
-        // Gestures Logic: Finger Up check (Y coordinate decreases as hand goes up)
-        const indexUp = indexTip.y < indexPip.y;
-        const middleUp = middleTip.y < middlePip.y;
-
-        if (indexUp && middleUp) {
-            // SELECTION MODE (Two fingers up) -> Stop drawing
-            statusDiv.innerText = "Status: Selection Mode (Hover to change colors)";
-            isDrawing = false;
+        // Sequential pixel analysis pass loop arrays mapping distance rules configurations
+        for (let y = 0; y < tempCanvas.height; y++) {
+            for (let x = 0; x < tempCanvas.width; x++) {
+                const idx = (y * tempCanvas.width + x) * 4;
+                const r = data[idx];
+                const g = data[idx + 1];
+                const b = data[idx + 2];
+                
+                // Color match vector calculation maps distance metrics rules limits
+                const dist = Math.sqrt((r - targetR)**2 + (g - targetG)**2 + (b - targetB)**2);
+                if (dist < colorThreshold) {
+                    sumX += x;
+                    sumY += y;
+                    count++;
+                }
+            }
+        }
+        
+        if (count > 8) {
+            // Convert scaled target pixels to full display coordinates layout maps
+            const posX = (sumX / count) / tempCanvas.width * canvas.width;
+            const posY = (sumY / count) / tempCanvas.height * canvas.height;
             
-            // Check button collision based on screen positions if needed, 
-            // or let visitors click the UI physically with their left hand!
-        } else if (indexUp && !middleUp) {
-            // DRAWING MODE (Only Index finger up)
-            statusDiv.innerText = "Status: ✍️ Drawing";
-            ctx.strokeStyle = brushColor;
-            ctx.lineWidth = brushThickness;
-            
-            if (!isDrawing) {
-                isDrawing = true;
-                lastX = x;
-                lastY = y;
+            if (wasTracking) {
+                ctx.beginPath();
+                ctx.moveTo(lastX, lastY);
+                ctx.lineTo(posX, posY);
+                ctx.strokeStyle = currentColor;
+                ctx.lineWidth = currentThickness;
+                ctx.stroke();
             }
             
-            ctx.beginPath();
-            ctx.moveTo(lastX, lastY);
-            ctx.lineTo(x, y);
-            ctx.stroke();
-            
-            lastX = x;
-            lastY = y;
+            lastX = posX;
+            lastY = posY;
+            wasTracking = true;
+        } else {
+            wasTracking = false;
         }
-    } else {
-        statusDiv.innerText = "Status: No hand detected";
-        isDrawing = false;
+    }
+    requestAnimationFrame(processFrame);
+}
+
+// Low resource native camera engine initialization modules pipeline
+async function initSystem() {
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: "user", width: 640, height: 480 },
+            audio: false
+        });
+        video.srcObject = stream;
+        video.play();
+        requestAnimationFrame(processFrame);
+    } catch (err) {
+        statusDiv.innerText = "⚠️ Camera Blocked! Set browser app settings authorizations.";
     }
 }
 
-// Initialise MediaPipe Hands Model
-const hands = new Hands({
-    locateFile: (file) => `https://jsdelivr.net{file}`
-});
-hands.setOptions({
-    maxNumHands: 1,
-    modelComplexity: 1,
-    minDetectionConfidence: 0.7,
-    minTrackingConfidence: 0.7
-});
-hands.onResults(onResults);
-
-// Stream tablet camera to the app
-const camera = new Camera(video, {
-    onFrame: async () => {
-        await hands.send({image: video});
-    },
-    width: 1280,
-    height: 720
-});
-camera.start();
+window.onload = initSystem;
 </script>
 
 </body>
