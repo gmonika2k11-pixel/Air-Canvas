@@ -3,107 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AI Air Canvas - Anti Glitch T515 Edition</title>
+    <title>AI Air Canvas - Shadow Proof T515 Edition</title>
     <style>
         body { 
-            margin: 0; 
-            padding: 0; 
-            overflow: hidden; 
-            background: #111111; 
+            margin: 0; padding: 0; overflow: hidden; background: #111111; 
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            user-select: none;
-            -webkit-user-select: none;
+            user-select: none; -webkit-user-select: none;
         }
-        #container { 
-            position: relative; 
-            width: 100vw; 
-            height: 100vh; 
-        }
-        video { 
-            transform: scaleX(-1); 
-            position: absolute; 
-            width: 100%; 
-            height: 100%; 
-            object-fit: cover; 
-            opacity: 0.35; 
-            z-index: 1;
-        }
+        #container { position: relative; width: 100vw; height: 100vh; }
+        
+        /* High-speed rendering stream viewport layers */
         canvas { 
-            position: absolute; 
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            height: 100%; 
-            transform: scaleX(-1); 
-            z-index: 2;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+            transform: scaleX(-1);
         }
+        #paintCanvas { z-index: 3; pointer-events: none; }
+        #cameraCanvas { z-index: 1; opacity: 0.45; }
+        
+        /* SHADOW CALIBRATION DOCK BOX */
+        #targetBox {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 50px; height: 50px; border: 4px dashed #ff3399; border-radius: 8px;
+            z-index: 5; pointer-events: none; box-shadow: 0 0 15px rgba(255, 51, 153, 0.4);
+        }
+        
         #menu { 
-            position: absolute; 
-            top: 20px; 
-            left: 50%; 
-            transform: translateX(-50%); 
-            display: flex; 
-            gap: 12px; 
-            background: rgba(255, 255, 255, 0.2); 
-            padding: 10px 20px; 
-            border-radius: 50px; 
-            backdrop-filter: blur(10px); 
-            -webkit-backdrop-filter: blur(10px);
-            z-index: 10; 
-            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-            border: 1px solid rgba(255,255,255,0.1);
+            position: absolute; top: 20px; left: 50%; transform: translateX(-50%); 
+            display: flex; gap: 12px; background: rgba(255, 255, 255, 0.2); 
+            padding: 10px 20px; border-radius: 50px; backdrop-filter: blur(10px); 
+            z-index: 10; box-shadow: 0 8px 32px rgba(0,0,0,0.5);
         }
-        .btn { 
-            width: 44px; 
-            height: 44px; 
-            border-radius: 50%; 
-            border: 2px solid white; 
-            cursor: pointer; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-        }
-        #red    { background: #FF3333; box-shadow: 0 0 10px #FF3333; }
-        #orange { background: #FF9933; box-shadow: 0 0 10px #FF9933; }
-        #yellow { background: #FFFF33; box-shadow: 0 0 10px #FFFF33; }
-        #green  { background: #33FF33; box-shadow: 0 0 10px #33FF33; }
-        #cyan   { background: #33FFFF; box-shadow: 0 0 10px #33FFFF; }
-        #blue   { background: #3333FF; box-shadow: 0 0 10px #3333FF; }
-        #purple { background: #9933FF; box-shadow: 0 0 10px #9933FF; }
-        #pink   { background: #FF3399; box-shadow: 0 0 10px #FF3399; }
-        #eraser { background: #444444; border-color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 18px; }
-        #clear  { background: #222222; border-color: #FF3333; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        .btn { width: 44px; height: 44px; border-radius: 50%; border: 2px solid white; cursor: pointer; }
+        #red { background: #FF3333; } #orange { background: #FF9933; } #yellow { background: #FFFF33; }
+        #green { background: #33FF33; } #cyan { background: #33FFFF; } #blue { background: #3333FF; }
+        #purple { background: #9933FF; } #pink { background: #FF3399; }
+        #eraser { background: #444444; border-color: #fff; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        #clear { background: #222222; border-color: #FF3333; display: flex; align-items: center; justify-content: center; font-size: 18px; }
         
         #status { 
-            position: absolute; 
-            bottom: 20px; 
-            left: 20px; 
-            color: white; 
-            background: rgba(0, 0, 0, 0.8); 
-            padding: 12px 24px; 
-            border-radius: 30px; 
-            font-weight: 500;
-            z-index: 10; 
-            border: 1px solid rgba(255,255,255,0.15);
+            position: absolute; bottom: 20px; left: 20px; color: white; 
+            background: rgba(0, 0, 0, 0.85); padding: 12px 24px; border-radius: 30px; z-index: 10;
+            font-size: 14px;
         }
         #calibrateBtn {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            background: #ff3399;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 30px;
-            font-weight: bold;
-            z-index: 10;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(255,51,153,0.4);
+            position: absolute; bottom: 20px; right: 20px; background: #ff3399; color: white;
+            border: none; padding: 12px 24px; border-radius: 30px; font-weight: bold; z-index: 10; cursor: pointer;
         }
     </style>
 </head>
 <body>
 
 <div id="container">
-    <video id="webcam" autoplay playsinline></video>
+    <div id="targetBox"></div>
+    
+    <!-- Render camera feed manually to prevent hardware canvas locks -->
+    <canvas id="cameraCanvas"></canvas>
     <canvas id="paintCanvas"></canvas>
     
     <div id="menu">
@@ -119,149 +73,163 @@
         <div class="btn" id="clear" onclick="clearCanvas()">❌</div>
     </div>
 
-    <div id="status">Put color cap on finger -> Tap Calibrate -> Hold in screen center</div>
+    <div id="status">Put Neon Green object in center box -> Tap Calibrate Color</div>
     <button id="calibrateBtn" onclick="startCalibration()">🎯 Calibrate Color</button>
 </div>
 
 <script>
-const video = document.getElementById('webcam');
-const canvas = document.getElementById('paintCanvas');
-const ctx = canvas.getContext('2d');
+// Create invisible video stream memory pipeline to bypass DOM display freezes
+const video = document.createElement('video');
+video.setAttribute('autoplay', '');
+video.setAttribute('playsinline', '');
+video.setAttribute('muted', '');
+
+const cameraCanvas = document.getElementById('cameraCanvas');
+const camCtx = cameraCanvas.getContext('2d');
+
+const paintCanvas = document.getElementById('paintCanvas');
+const paintCtx = paintCanvas.getContext('2d');
+
 const statusDiv = document.getElementById('status');
+const targetBox = document.getElementById('targetBox');
 
 let currentColor = '#FF3333'; 
 let currentThickness = 8;
 let lastX = 0, lastY = 0;
 let wasTracking = false;
 
-// Setup default tracking colors (Optimized target bounds)
-let targetR = 0, targetG = 180, targetB = 255; // Defaults to a strong bright neon color template
-let colorThreshold = 35; // Lower values mean tighter checking (prevents background noise matching)
+// Shadow-proof Advanced HSV variables mapping
+let targetH = 0, targetS = 0;
+let isCalibrated = false;
 let isCalibrating = false;
 
-function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    ctx.shadowBlur = 8;
-    ctx.shadowColor = currentColor;
+// Converts RGB matrices to stable HSV color spaces to separate color from shadow values
+function rgbToHsv(r, g, b) {
+    r /= 255; g /= 255; b /= 255;
+    let max = Math.max(r, g, b), min = Math.min(r, g, b);
+    let h, s, v = max;
+    let d = max - min;
+    s = max === 0 ? 0 : d / max;
+    if (max === min) { h = 0; } else {
+        switch (max) {
+            case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+            case g: h = (b - r) / d + 2; break;
+            case b: h = (r - g) / d + 4; break;
+        }
+        h /= 6;
+    }
+    return [h * 360, s * 100, v * 100];
 }
-window.addEventListener('resize', resizeCanvas);
-resizeCanvas();
+
+function resizeCanvases() {
+    cameraCanvas.width = window.innerWidth;
+    cameraCanvas.height = window.innerHeight;
+    paintCanvas.width = window.innerWidth;
+    paintCanvas.height = window.innerHeight;
+    
+    paintCtx.lineCap = 'round';
+    paintCtx.lineJoin = 'round';
+    paintCtx.shadowBlur = 8;
+    paintCtx.shadowColor = currentColor;
+}
+window.addEventListener('resize', resizeCanvases);
+resizeCanvases();
 
 function setColor(hexColor, name) {
-    currentColor = hexColor;
-    currentThickness = 8;
-    ctx.shadowBlur = 8;
-    ctx.shadowColor = currentColor;
+    currentColor = hexColor; currentThickness = 8;
+    paintCtx.shadowBlur = 8; paintCtx.shadowColor = currentColor;
     statusDiv.innerText = `Active Color: ${name}`;
 }
 
 function setEraser() {
-    currentColor = '#111111'; 
-    currentThickness = 60;     
-    ctx.shadowBlur = 0;
+    currentColor = '#111111'; currentThickness = 60; paintCtx.shadowBlur = 0;
     statusDiv.innerText = "Active Tool: Eraser Pad";
 }
 
 function clearCanvas() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    paintCtx.clearRect(0, 0, paintCanvas.width, paintCanvas.height);
     statusDiv.innerText = "Canvas Cleared!";
 }
 
 function startCalibration() {
     isCalibrating = true;
-    statusDiv.innerText = "🎯 Tracking Calibration Locked! Place target color spot at center...";
+    statusDiv.innerText = "Scanning tracking target color variables...";
 }
 
-function processFrame() {
+// Low resource tracking frame loops built to run natively on 2GB RAM devices
+function runPipeline() {
     if (video.readyState === video.HAVE_ENOUGH_DATA) {
+        // Draw the background camera video arrays onto the display screen canvas
+        camCtx.drawImage(video, 0, 0, cameraCanvas.width, cameraCanvas.height);
+        
+        // Low footprint resolution parameters preventing CPU choking
+        const trackWidth = 160;
+        const trackHeight = 120;
+        
         const tempCanvas = document.createElement('canvas');
-        tempCanvas.width = 160; 
-        tempCanvas.height = 120;
+        tempCanvas.width = trackWidth;
+        tempCanvas.height = trackHeight;
         const tempCtx = tempCanvas.getContext('2d');
         
-        tempCtx.translate(tempCanvas.width, 0);
-        tempCtx.scale(-1, 1);
-        tempCtx.drawImage(video, 0, 0, tempCanvas.width, tempCanvas.height);
-        
-        const frameData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+        tempCtx.drawImage(cameraCanvas, 0, 0, trackWidth, trackHeight);
+        const frameData = tempCtx.getImageData(0, 0, trackWidth, trackHeight);
         const data = frameData.data;
         
         let sumX = 0, sumY = 0, count = 0;
         
         if (isCalibrating) {
-            const midIdx = ((tempCanvas.height / 2) * tempCanvas.width + (tempCanvas.width / 2)) * 4;
-            targetR = data[midIdx];
-            targetG = data[midIdx + 1];
-            targetB = data[midIdx + 2];
+            let midX = Math.floor(trackWidth / 2);
+            let midY = Math.floor(trackHeight / 2);
+            let idx = (midY * trackWidth + midX) * 4;
+            
+            let hsv = rgbToHsv(data[idx], data[idx+1], data[idx+2]);
+            targetH = hsv[0]; // Saves pure color wavelength (Hue)
+            targetS = hsv[1]; // Saves Saturation properties
+            
             isCalibrating = false;
-            statusDiv.innerText = "Calibration Done! Ready to Draw.";
+            isCalibrated = true;
+            targetBox.style.borderColor = "#33ff33"; // Switch calibration frame box color to green
+            statusDiv.innerText = "Shadow Filtering Active! Step back and trace.";
         }
 
-        for (let y = 0; y < tempCanvas.height; y++) {
-            for (let x = 0; x < tempCanvas.width; x++) {
-                const idx = (y * tempCanvas.width + x) * 4;
-                const r = data[idx];
-                const g = data[idx + 1];
-                const b = data[idx + 2];
-                
-                const dist = Math.sqrt((r - targetR)**2 + (g - targetG)**2 + (b - targetB)**2);
-                if (dist < colorThreshold) {
-                    sumX += x;
-                    sumY += y;
-                    count++;
-                }
-            }
-        }
-        
-        // 🔥 ANTI-GLITCH SAFETY MECHANISMS STAGE
-        // Limits tracking strictly between 15 pixels (finger point) and 400 pixels (ignores background wall blocks)
-        if (count > 15 && count < 400) {
-            const posX = (sumX / count) / tempCanvas.width * canvas.width;
-            const posY = (sumY / count) / tempCanvas.height * canvas.height;
-            
-            if (wasTracking) {
-                // Ignore sudden glitched teleports across the screen greater than 180 pixels
-                const jumpDistance = Math.sqrt((posX - lastX)**2 + (posY - lastY)**2);
-                
-                if (jumpDistance < 180) {
-                    ctx.beginPath();
-                    ctx.moveTo(lastX, lastY);
-                    ctx.lineTo(posX, posY);
-                    ctx.strokeStyle = currentColor;
-                    ctx.lineWidth = currentThickness;
-                    ctx.stroke();
+        if (isCalibrated) {
+            for (let y = 0; y < trackHeight; y++) {
+                for (let x = 0; x < trackWidth; x++) {
+                    const idx = (y * trackWidth + x) * 4;
+                    const hsv = rgbToHsv(data[idx], data[idx+1], data[idx+2]);
+                    
+                    // Shadow-Proof calculation logic: checks Hue distance strictly
+                    const hDist = Math.min(Math.abs(hsv[0] - targetH), 360 - Math.abs(hsv[0] - targetH));
+                    
+                    // 🔥 SHADOW IGNORE MASK: Ignores Value/Brightness variations completely
+                    // If Hue matches target color, it tracks it even if value drops down to 15 (heavy shadow block)
+                    if (hDist < 25 && hsv[1] > 20 && hsv[2] > 15) {
+                        sumX += x;
+                        sumY += y;
+                        count++;
+                    }
                 }
             }
             
-            lastX = posX;
-            lastY = posY;
-            wasTracking = true;
-        } else {
-            wasTracking = false;
-        }
-    }
-    requestAnimationFrame(processFrame);
-}
-
-async function initSystem() {
-    try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: "user", width: 640, height: 480 },
-            audio: false
-        });
-        video.srcObject = stream;
-        video.play();
-        requestAnimationFrame(processFrame);
-    } catch (err) {
-        statusDiv.innerText = "⚠️ Camera Blocked! Open device permissions settings panels.";
-    }
-}
-
-window.onload = initSystem;
-</script>
-
+            // Filters out minor background noise spikes using index tip sizing templates
+            if (count > 4 && count < 250) {
+                const posX = (sumX / count) / trackWidth * paintCanvas.width;
+                const posY = (sumY / count) / trackHeight * paintCanvas.height;
+                
+                if (wasTracking) {
+                    const jumpDistance = Math.sqrt((posX - lastX)**2 + (posY - lastY)**2);
+                    if (jumpDistance < 150) {
+                        paintCtx.beginPath();
+                        paintCtx.moveTo(lastX, lastY);
+                        paintCtx.lineTo(posX, posY);
+                        paintCtx.strokeStyle = currentColor;
+                        paintCtx.lineWidth = currentThickness;
+                        paintCtx.stroke();
+                    }
+                }
+                
+                lastX = posX;
+                lastY = posY;
+                </script>
 </body>
 </html>
