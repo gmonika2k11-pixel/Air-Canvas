@@ -25,7 +25,7 @@
             width: 100%; 
             height: 100%; 
             object-fit: cover; 
-            opacity: 0.35; 
+            opacity: 0.4; 
             z-index: 1;
         }
         canvas { 
@@ -37,6 +37,22 @@
             transform: scaleX(-1); 
             z-index: 2;
         }
+        
+        /* TARGET CALIBRATION BOX */
+        #targetBox {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60px;
+            height: 60px;
+            border: 4px dashed #ff3399;
+            border-radius: 8px;
+            z-index: 5;
+            box-shadow: 0 0 15px rgba(255, 51, 153, 0.5);
+            pointer-events: none;
+        }
+
         #menu { 
             position: absolute; 
             top: 20px; 
@@ -77,7 +93,7 @@
             bottom: 20px; 
             left: 20px; 
             color: white; 
-            background: rgba(0, 0, 0, 0.8); 
+            background: rgba(0, 0, 0, 0.85); 
             padding: 12px 24px; 
             border-radius: 30px; 
             font-weight: 500;
@@ -103,6 +119,7 @@
 <body>
 
 <div id="container">
+    <div id="targetBox"></div>
     <video id="webcam" autoplay playsinline></video>
     <canvas id="paintCanvas"></canvas>
     
@@ -119,7 +136,7 @@
         <div class="btn" id="clear" onclick="clearCanvas()">❌</div>
     </div>
 
-    <div id="status">Put color cap on finger -> Tap Calibrate -> Hold in screen center</div>
+    <div id="status">Align your colored pointer inside the center square and tap Calibrate</div>
     <button id="calibrateBtn" onclick="startCalibration()">🎯 Calibrate Color</button>
 </div>
 
@@ -128,16 +145,37 @@ const video = document.getElementById('webcam');
 const canvas = document.getElementById('paintCanvas');
 const ctx = canvas.getContext('2d');
 const statusDiv = document.getElementById('status');
+const targetBox = document.getElementById('targetBox');
 
 let currentColor = '#FF3333'; 
 let currentThickness = 8;
 let lastX = 0, lastY = 0;
 let wasTracking = false;
 
-// Setup default tracking colors (Optimized target bounds)
-let targetR = 0, targetG = 180, targetB = 255; // Defaults to a strong bright neon color template
-let colorThreshold = 35; // Lower values mean tighter checking (prevents background noise matching)
+// Robust HSV Tracking Parameters (Defaults to a placeholder neon range)
+let targetH = 0, targetS = 0, targetV = 0;
+let isCalibrated = false;
 let isCalibrating = false;
+
+// Converts RGB values to the stable HSV color wheel range
+function rgbToHsv(r, g, b) {
+    r /= 255; g /= 255; b /= 255;
+    let max = Math.max(r, g, b), min = Math.min(r, g, b);
+    let h, s, v = max;
+    let d = max - min;
+    s = max === 0 ? 0 : d / max;
+    if (max === min) {
+        h = 0;
+    } else {
+        switch (max) {
+            case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+            case g: h = (b - r) / d + 2; break;
+            case b: h = (r - g) / d + 4; break;
+        }
+        h /= 6;
+    }
+    return [h * 360, s * 100, v * 100];
+}
 
 function resizeCanvas() {
     canvas.width = window.innerWidth;
@@ -172,13 +210,13 @@ function clearCanvas() {
 
 function startCalibration() {
     isCalibrating = true;
-    statusDiv.innerText = "🎯 Tracking Calibration Locked! Place target color spot at center...";
+    statusDiv.innerText = "Capturing central point color properties...";
 }
 
 function processFrame() {
     if (video.readyState === video.HAVE_ENOUGH_DATA) {
         const tempCanvas = document.createElement('canvas');
-        tempCanvas.width = 160; 
+        tempCanvas.width = 160; // Ultra downscaled to fit Tab T515 hardware limits
         tempCanvas.height = 120;
         const tempCtx = tempCanvas.getContext('2d');
         
@@ -192,76 +230,46 @@ function processFrame() {
         let sumX = 0, sumY = 0, count = 0;
         
         if (isCalibrating) {
-            const midIdx = ((tempCanvas.height / 2) * tempCanvas.width + (tempCanvas.width / 2)) * 4;
-            targetR = data[midIdx];
-            targetG = data[midIdx + 1];
-            targetB = data[midIdx + 2];
+            // Sample a 4x4 cluster directly out of the center box frame coordinates
+            let midX = Math.floor(tempCanvas.width / 2);
+            let midY = Math.floor(tempCanvas.height / 2);
+            let idx = (midY * tempCanvas.width + midX) * 4;
+            
+            let hsv = rgbToHsv(data[idx], data[idx+1], data[idx+2]);
+            targetH = hsv[0];
+            targetS = hsv[1];
+            targetV = hsv[2];
+            
             isCalibrating = false;
-            statusDiv.innerText = "Calibration Done! Ready to Draw.";
+            isCalibrated = true;
+            targetBox.style.borderColor = "#33ff33"; // Switch frame border to green
+            statusDiv.innerText = "Color Locked! Step back and draw.";
         }
 
-        for (let y = 0; y < tempCanvas.height; y++) {
-            for (let x = 0; x < tempCanvas.width; x++) {
-                const idx = (y * tempCanvas.width + x) * 4;
-                const r = data[idx];
-                const g = data[idx + 1];
-                const b = data[idx + 2];
-                
-                const dist = Math.sqrt((r - targetR)**2 + (g - targetG)**2 + (b - targetB)**2);
-                if (dist < colorThreshold) {
-                    sumX += x;
-                    sumY += y;
-                    count++;
-                }
-            }
-        }
-        
-        // 🔥 ANTI-GLITCH SAFETY MECHANISMS STAGE
-        // Limits tracking strictly between 15 pixels (finger point) and 400 pixels (ignores background wall blocks)
-        if (count > 15 && count < 400) {
-            const posX = (sumX / count) / tempCanvas.width * canvas.width;
-            const posY = (sumY / count) / tempCanvas.height * canvas.height;
-            
-            if (wasTracking) {
-                // Ignore sudden glitched teleports across the screen greater than 180 pixels
-                const jumpDistance = Math.sqrt((posX - lastX)**2 + (posY - lastY)**2);
-                
-                if (jumpDistance < 180) {
-                    ctx.beginPath();
-                    ctx.moveTo(lastX, lastY);
-                    ctx.lineTo(posX, posY);
-                    ctx.strokeStyle = currentColor;
-                    ctx.lineWidth = currentThickness;
-                    ctx.stroke();
+        if (isCalibrated) {
+            for (let y = 0; y < tempCanvas.height; y++) {
+                for (let x = 0; x < tempCanvas.width; x++) {
+                    const idx = (y * tempCanvas.width + x) * 4;
+                    const hsv = rgbToHsv(data[idx], data[idx+1], data[idx+2]);
+                    
+                    // Robust check parameters isolating the exact color type (Hue) away from shadow interference
+                    const hDist = Math.min(Math.abs(hsv[0] - targetH), 360 - Math.abs(hsv[0] - targetH));
+                    
+                    if (hDist < 20 && hsv[1] > 25 && hsv[2] > 20) {
+                        sumX += x;
+                        sumY += y;
+                        count++;
+                    }
                 }
             }
             
-            lastX = posX;
-            lastY = posY;
-            wasTracking = true;
-        } else {
-            wasTracking = false;
-        }
-    }
-    requestAnimationFrame(processFrame);
-}
-
-async function initSystem() {
-    try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: "user", width: 640, height: 480 },
-            audio: false
-        });
-        video.srcObject = stream;
-        video.play();
-        requestAnimationFrame(processFrame);
-    } catch (err) {
-        statusDiv.innerText = "⚠️ Camera Blocked! Open device permissions settings panels.";
-    }
-}
-
-window.onload = initSystem;
-</script>
-
-</body>
-</html>
+            // Noise filtering dimensions block matching a fingertip cap profile size
+            if (count > 8 && count < 350) {
+                const posX = (sumX / count) / tempCanvas.width * canvas.width;
+                const posY = (sumY / count) / tempCanvas.height * canvas.height;
+                
+                if (wasTracking) {
+                    const jumpDistance = Math.sqrt((posX - lastX)**2 + (posY - lastY)**2);
+                    if (jumpDistance < 150) {
+                        ctx.beginPath();
+                        ctx.moveTo(lastX, lastY);
