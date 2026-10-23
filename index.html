@@ -470,42 +470,6 @@ function runPipeline() {
                 
                 lastX = posX;
                 lastY = posY;
-wasTracking = true;
-} else {
-wasTracking = false;
-}
-}
-}
-requestAnimationFrame(runPipeline);
-}
-async function initSystem() {
-try {
-const stream = await navigator.mediaDevices.getUserMedia({
-video: { facingMode: "user", width: 640, height: 480 },
-audio: false
-});
-video.srcObject = stream;
-video.setAttribute('autoplay', '');
-video.setAttribute('playsinline', '');
-video.play();
-requestAnimationFrame(runPipeline);
-} catch (err) {
-statusDiv.innerText = "⚠️ Camera Blocked. Open site address extensions permissions securely over https link.";
-}
-}
-window.onload = initSystem;
-
-### 💡 The Perfect Setup Steps for Exhibition Day
-
-1. **Upload File:** Update your GitHub `index.html` file using this updated layout [filegen-via-code].
-2. **Find a Neon Green Pointer:** Use a **bright neon green marker cap, neon green electrical tape** wrapped over your index finger tip, or a bright piece of plastic. Avoid dark shades or skin colors.
-3. **Calibrate:** Hold the neon green item close to the screen until it **completely fills up the pink dashed box**. Tap **Calibrate Color**. 
-4. **Step Back:** Once the box turns green, step back 3 to 4 feet. The tablet will now ignore all room lighting changes and trace your finger's path seamlessly.
-
-<FollowUp>
-Deploy this robust single-file script straight to your **GitHub repository** [filegen-via-code]! Once you try the **Neon Green color calibration technique** on your tablet link, let me know if it tracks your movements cleanly through the shadows.
-</FollowUp>
-
                 </script>
 </body>
 </html>
